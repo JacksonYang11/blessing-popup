@@ -97,11 +97,31 @@ class BlessingPopup:
         pygame.mixer.init()
         pygame.mixer.music.set_volume(0.5)  # 设置音量为50%
         
-        # 如果没有提供音乐文件路径，让用户输入
+        # 如果没有提供音乐文件路径，自动扫描res/music文件夹
         if not music_path:
-            music_path = input("请输入要播放的音乐文件路径（支持.mp3, .wav等格式），或直接回车跳过音乐播放：")
-            if not music_path.strip():
-                return  # 用户选择跳过音乐播放
+            # 定义音乐文件夹路径
+            music_dir = os.path.join(os.path.dirname(__file__), 'res', 'music')
+            
+            # 检查文件夹是否存在
+            if not os.path.exists(music_dir):
+                print(f"音乐文件夹不存在: {music_dir}")
+                return
+            
+            # 扫描文件夹中的音乐文件
+            music_files = []
+            for file in os.listdir(music_dir):
+                if file.lower().endswith(('.mp3', '.wav', '.ogg', '.m4a', '.flac')):
+                    music_files.append(file)
+            
+            # 如果没有找到音乐文件，跳过播放
+            if not music_files:
+                print("未在res/music文件夹中找到音乐文件")
+                return
+            
+            # 随机选择一个音乐文件
+            selected_music = random.choice(music_files)
+            music_path = os.path.join(music_dir, selected_music)
+            print(f"随机选择音乐: {selected_music}")
         
         # 处理PyInstaller打包后的路径
         if hasattr(sys, '_MEIPASS'):
@@ -124,8 +144,8 @@ class BlessingPopup:
 # 使用示例
 popup_system = BlessingPopup()  # 创建弹窗系统实例
 
-# 播放背景音乐
-popup_system.play_background_music(r"浆果.mp3")
+# 播放背景音乐（自动随机选择res/music文件夹中的音乐文件）
+popup_system.play_background_music()
 
 print(f"开始生成{len(popup_system.blessings)}个永不消失的祝福窗口...")
 print(f"祝福语文本库已包含{len(popup_system.blessings)}条不同的问候语")
